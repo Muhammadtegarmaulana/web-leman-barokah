@@ -126,4 +126,34 @@ class OrderController extends Controller
         $orders = Order::where('user_id', Auth::id())->latest()->get();
         return view('customer.orders.index', compact('orders'));
     }
+
+    // TAMBAHAN: UPDATE QUANTITY (AJAX)
+    public function updateCart(Request $request)
+    {
+        if($request->id && $request->action) {
+            $cart = session()->get('cart');
+            
+            if(isset($cart[$request->id])) {
+                
+                // Jika tombol tambah ditekan
+                if($request->action == 'plus') {
+                    $cart[$request->id]['quantity']++;
+                } 
+                // Jika tombol kurang ditekan
+                elseif ($request->action == 'minus') {
+                    $cart[$request->id]['quantity']--;
+                }
+
+                // Cek apakah quantity jadi 0 atau kurang? Jika ya, hapus item
+                if($cart[$request->id]['quantity'] < 1) {
+                    unset($cart[$request->id]);
+                    session()->put('cart', $cart);
+                    session()->flash('success', 'Item dihapus dari keranjang.');
+                } else {
+                    // Jika tidak 0, simpan update quantity
+                    session()->put('cart', $cart);
+                }
+            }
+        }
+    }
 }

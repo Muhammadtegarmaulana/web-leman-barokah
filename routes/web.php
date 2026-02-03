@@ -47,8 +47,6 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/customer/dashboard', function () {
         return view('customer.dashboard');
     })->name('customer.dashboard');
-    
-    // Nanti Order & Cart ditaruh di sini
 });
 
 // --- ROUTE PROFILE (Bawaan Breeze) ---
@@ -62,6 +60,9 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/customer/dashboard', [App\Http\Controllers\OrderController::class, 'index'])->name('customer.dashboard');
     
+    // Update Quantity
+    Route::patch('update-cart', [App\Http\Controllers\OrderController::class, 'updateCart'])->name('update_cart');
+
     // Keranjang
     Route::get('cart', [App\Http\Controllers\OrderController::class, 'cart'])->name('cart');
     Route::get('add-to-cart/{id}', [App\Http\Controllers\OrderController::class, 'addToCart'])->name('add_to_cart');
