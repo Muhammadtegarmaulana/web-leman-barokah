@@ -4,8 +4,15 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
+// Halaman Awal Langsung Redirect
 Route::get('/', function () {
-    return view('welcome');
+    if (Auth::check()) {
+        if (Auth::user()->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+        return redirect()->route('customer.dashboard');
+    }
+    return redirect()->route('login');
 });
 
 // Redirect setelah login berdasarkan role
