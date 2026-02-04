@@ -9,9 +9,21 @@ use Illuminate\Support\Facades\Storage;
 class MenuController extends Controller
 {
     // 1. Tampilkan Daftar Menu
-    public function index()
+    public function index(Request $request)
     {
-        $menus = Menu::all();
+        $query = Menu::query();
+
+        // Search by Name
+        if ($request->search) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter by Category
+        if ($request->category && $request->category != 'semua') {
+            $query->where('category', $request->category);
+        }
+
+        $menus = $query->latest()->paginate(10)->withQueryString();
         return view('admin.menus.index', compact('menus'));
     }
 

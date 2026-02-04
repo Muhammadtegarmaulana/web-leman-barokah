@@ -1,79 +1,131 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-bold text-2xl text-gray-800 leading-tight">
-            📈 Laporan Pendapatan
-        </h2>
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
+            <h2 class="font-bold text-2xl text-gray-800 leading-tight flex items-center gap-2">
+                📈 Laporan Keuangan & Penjualan
+            </h2>
+            <button onclick="window.print()" class="bg-gray-800 hover:bg-black text-white font-bold py-2.5 px-6 rounded-xl shadow-lg transition transform hover:-translate-y-1 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                Cetak Laporan
+            </button>
+        </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6 no-print">
-                <form method="GET" action="{{ route('admin.reports.index') }}" class="flex flex-col md:flex-row gap-4 items-end">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Dari Tanggal</label>
-                        <input type="date" name="start_date" value="{{ $startDate }}" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 print:mb-4">
+                <div class="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="text-indigo-200 text-xs font-bold uppercase tracking-wider mb-1">Total Omset Periode Ini</div>
+                        <div class="text-3xl font-black">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Sampai Tanggal</label>
-                        <input type="date" name="end_date" value="{{ $endDate }}" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <div class="absolute right-0 bottom-0 opacity-10 transform translate-x-4 translate-y-4">
+                        <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path></svg>
                     </div>
-                    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md font-bold hover:bg-indigo-700">
-                        Filter
-                    </button>
-                    <button type="button" onclick="window.print()" class="bg-gray-800 text-white px-4 py-2 rounded-md font-bold hover:bg-gray-900 ml-auto">
-                        🖨️ Cetak Laporan
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col justify-center">
+                    <div class="text-gray-400 text-xs font-bold uppercase mb-2">Periode Laporan</div>
+                    <div class="flex items-center gap-2 text-gray-800 font-bold text-lg">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} 
+                        <span class="text-gray-400 mx-1">-</span>
+                        {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col justify-center">
+                    <div class="text-gray-400 text-xs font-bold uppercase mb-2">Total Transaksi Berhasil</div>
+                    <div class="text-3xl font-black text-gray-800">{{ $orders->total() }} <span class="text-sm font-medium text-gray-400">Pesanan</span></div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8 print:hidden">
+                <form action="{{ route('admin.reports.index') }}" method="GET" class="flex flex-col md:flex-row gap-4 items-end">
+                    <div class="w-full">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Dari Tanggal</label>
+                        <input type="date" name="start_date" value="{{ $startDate }}" class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-2.5">
+                    </div>
+                    <div class="w-full">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Sampai Tanggal</label>
+                        <input type="date" name="end_date" value="{{ $endDate }}" class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-2.5">
+                    </div>
+                    <button type="submit" class="w-full md:w-auto bg-indigo-600 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-indigo-700 transition shadow-md">
+                        Tampilkan
                     </button>
                 </form>
             </div>
 
-            <div class="bg-indigo-600 text-white rounded-xl shadow-lg p-6 mb-6 flex justify-between items-center">
-                <div>
-                    <h3 class="text-lg font-semibold opacity-80">Total Pendapatan ({{ \Carbon\Carbon::parse($startDate)->format('d M') }} - {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }})</h3>
-                </div>
-                <div class="text-4xl font-extrabold">
-                    Rp {{ number_format($totalRevenue, 0, ',', '.') }}
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-2xl border border-gray-100 print:shadow-none print:border-0">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 print:bg-gray-100">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Pelanggan</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Tipe Order</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Metode Bayar</th>
+                                <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-100">
+                            @forelse($orders as $order)
+                            <tr class="hover:bg-gray-50 transition print:hover:bg-transparent">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                    {{ $order->created_at->format('d/m/Y') }}
+                                    <span class="text-xs text-gray-400 block">{{ $order->created_at->format('H:i') }}</span>
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-bold text-gray-900">{{ $order->user->name }}</div>
+                                    <div class="text-[10px] text-gray-400">Order ID: #{{ $order->id }}</div>
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase border {{ $order->order_type == 'dine_in' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-orange-50 text-orange-600 border-orange-100' }}">
+                                        {{ $order->order_type == 'dine_in' ? 'Dine In' : 'Pickup' }}
+                                    </span>
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600 capitalize">
+                                    {{ $order->payment_method }}
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap text-right font-black text-gray-800">
+                                    Rp {{ number_format($order->total_price, 0, ',', '.') }}
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-10 text-center text-gray-500 italic">
+                                    Tidak ada data transaksi pada periode ini.
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                        <tfoot class="bg-gray-50 print:bg-gray-100 font-bold text-gray-700">
+                            <tr>
+                                <td colspan="4" class="px-6 py-4 text-right uppercase text-xs tracking-wider">Subtotal Halaman Ini</td>
+                                <td class="px-6 py-4 text-right">Rp {{ number_format($orders->sum('total_price'), 0, ',', '.') }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
 
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-2xl border border-gray-100 p-6">
-                <h3 class="font-bold text-gray-700 mb-4">Rincian Transaksi</h3>
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50 border-b">
-                            <th class="p-3 text-sm">Tanggal</th>
-                            <th class="p-3 text-sm">No. Antrian</th>
-                            <th class="p-3 text-sm">Customer</th>
-                            <th class="p-3 text-sm">Tipe</th>
-                            <th class="p-3 text-sm text-right">Nominal</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @forelse($orders as $order)
-                        <tr>
-                            <td class="p-3 text-sm">{{ $order->created_at->format('d/m/Y H:i') }}</td>
-                            <td class="p-3 font-bold text-indigo-600">{{ $order->queue_number ?? '-' }}</td>
-                            <td class="p-3 text-sm">{{ $order->user->name }}</td>
-                            <td class="p-3 text-sm capitalize">{{ $order->order_type }}</td>
-                            <td class="p-3 font-bold text-right">Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="5" class="p-6 text-center text-gray-500">Tidak ada data transaksi pada rentang tanggal ini.</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+            <div class="mt-8 print:hidden">
+                {{ $orders->links() }}
+            </div>
+            
+            <div class="hidden print:flex justify-end mt-16 pr-10">
+                <div class="text-center">
+                    <p class="mb-20">Medan, {{ date('d F Y') }}</p>
+                    <p class="font-bold underline">{{ Auth::user()->name }}</p>
+                    <p class="text-sm">Manager Operasional</p>
+                </div>
             </div>
 
         </div>
     </div>
-
-    <style>
-        @media print {
-            .no-print, nav, header { display: none !important; }
-            body { background: white; }
-            .shadow-xl, .shadow-lg { box-shadow: none !important; }
-        }
-    </style>
 </x-app-layout>
