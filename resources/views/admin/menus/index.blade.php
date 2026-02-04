@@ -81,10 +81,10 @@
                                             ✏️ Edit
                                         </a>
                                         
-                                        <form action="{{ route('admin.menus.destroy', $menu->id) }}" method="POST" onsubmit="return confirm('Hapus menu {{ $menu->name }}?');">
+                                        <form action="{{ route('admin.menus.destroy', $menu->id) }}" method="POST" class="delete-form">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 p-2 rounded-lg hover:bg-red-100 transition">
+                                            <button type="button" class="text-red-600 hover:text-red-900 bg-red-50 p-2 rounded-lg hover:bg-red-100 transition btn-delete" data-name="{{ $menu->name }}">
                                                 🗑️ Hapus
                                             </button>
                                         </form>
@@ -108,4 +108,48 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Tangkap event klik pada semua tombol class 'btn-delete'
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteButtons = document.querySelectorAll('.btn-delete');
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault(); // Mencegah form submit langsung
+                    
+                    const form = this.closest('form');
+                    const menuName = this.getAttribute('data-name');
+
+                    Swal.fire({
+                        title: 'Hapus Menu?',
+                        text: "Menu '" + menuName + "' akan dihapus permanen.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#EF4444', // Warna Merah
+                        cancelButtonColor: '#6B7280', // Warna Abu
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal',
+                        background: '#fff',
+                        customClass: {
+                            popup: 'rounded-xl'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Efek Loading sebelum submit
+                            Swal.fire({
+                                title: 'Sedang Menghapus...',
+                                allowOutsideClick: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
 </x-app-layout>
