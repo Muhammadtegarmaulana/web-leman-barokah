@@ -20,15 +20,12 @@
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                             {{ __('Dashboard') }}
                         </x-nav-link>
-
                         <x-nav-link :href="route('admin.menus.index')" :active="request()->routeIs('admin.menus.*')">
                             {{ __('Menu') }}
                         </x-nav-link>
-
                         <x-nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')">
                             {{ __('Pesanan') }}
                         </x-nav-link>
-
                         <x-nav-link :href="route('admin.reports.index')" :active="request()->routeIs('admin.reports.*')">
                             {{ __('Laporan') }}
                         </x-nav-link>
@@ -37,6 +34,23 @@
                     @if(Auth::user()->role === 'customer')
                         <x-nav-link :href="route('customer.dashboard')" :active="request()->routeIs('customer.dashboard')">
                             {{ __('Pesan Makan') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('customer.orders.active')" :active="request()->routeIs('customer.orders.active')">
+                            <span class="flex items-center gap-2">
+                                {{ __('Pesanan Aktif') }}
+                                @php
+                                    $activeCount = \App\Models\Order::where('user_id', Auth::id())
+                                        ->where('order_status', '!=', 'completed')
+                                        ->count();
+                                @endphp
+                                @if($activeCount > 0)
+                                    <span class="flex h-2 w-2 relative">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                    </span>
+                                @endif
+                            </span>
                         </x-nav-link>
 
                         <x-nav-link :href="route('cart')" :active="request()->routeIs('cart')">
@@ -62,18 +76,15 @@
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-4 py-2 border border-gray-200 text-sm leading-4 font-medium rounded-full text-gray-700 bg-gray-50 hover:bg-white hover:text-indigo-600 focus:outline-none transition ease-in-out duration-150 shadow-sm">
-                            
                             <div class="flex flex-col items-end mr-2 text-right">
                                 <span class="font-bold">{{ Auth::user()->name }}</span>
                                 <span class="text-[10px] uppercase font-bold tracking-wider {{ Auth::user()->role === 'admin' ? 'text-indigo-500' : 'text-green-500' }}">
                                     {{ Auth::user()->role }}
                                 </span>
                             </div>
-
                             <div class="p-1 bg-gray-200 rounded-full">
                                 <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                             </div>
-                            
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -87,12 +98,10 @@
                             <p class="text-xs text-gray-500">Login sebagai:</p>
                             <p class="text-sm font-bold text-gray-800">{{ Auth::user()->email }}</p>
                         </div>
-
                         <x-dropdown-link :href="route('profile.edit')" class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                             {{ __('Pengaturan Akun') }}
                         </x-dropdown-link>
-
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <x-dropdown-link :href="route('logout')" class="text-red-600 hover:bg-red-50 flex items-center gap-2"
@@ -152,6 +161,18 @@
                 <x-responsive-nav-link :href="route('customer.dashboard')" :active="request()->routeIs('customer.dashboard')" class="rounded-lg">
                     {{ __('Pesan Makan') }}
                 </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('customer.orders.active')" :active="request()->routeIs('customer.orders.active')" class="rounded-lg">
+                    <span class="flex items-center justify-between w-full">
+                        {{ __('Pesanan Aktif') }}
+                        @if($activeCount > 0)
+                            <span class="bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+                                {{ $activeCount }}
+                            </span>
+                        @endif
+                    </span>
+                </x-responsive-nav-link>
+
                 <x-responsive-nav-link :href="route('cart')" :active="request()->routeIs('cart')" class="rounded-lg">
                     {{ __('Keranjang') }}
                     @if(session('cart'))

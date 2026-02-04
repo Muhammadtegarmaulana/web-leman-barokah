@@ -79,6 +79,9 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('checkout', [App\Http\Controllers\OrderController::class, 'checkout'])->name('checkout');
     Route::post('place-order', [App\Http\Controllers\OrderController::class, 'storeOrder'])->name('place_order');
     
+    // Aktif Orders
+    Route::get('orders/active', [App\Http\Controllers\OrderController::class, 'activeOrders'])->name('customer.orders.active');
+    
     // Riwayat
     Route::get('my-orders', [App\Http\Controllers\OrderController::class, 'history'])->name('customer.orders.index');
 });

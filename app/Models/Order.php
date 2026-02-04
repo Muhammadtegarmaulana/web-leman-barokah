@@ -10,26 +10,24 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'queue_number',
-        'table_number',
-        'order_type',
-        'payment_method',
-        'payment_proof',
-        'payment_status',
-        'order_status',
-        'total_price',
+        'user_id', 'order_type', 'table_number', 'payment_method', 
+        'payment_status','payment_proof', 'order_status', 'queue_number', 'total_price'
     ];
 
-    // Relasi: Order milik 1 User
-    public function user()
+    public function items()
     {
-        return $this->belongsTo(User::class);
+        // Satu Order memiliki banyak OrderItem
+        return $this->hasMany(OrderItem::class);
     }
 
-    // Relasi: Order punya banyak Item Menu
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    // Relasi ke User
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

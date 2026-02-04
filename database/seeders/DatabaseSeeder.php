@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             MenuSeeder::class,
-            DummyOrderSeeder::class,
+            // DummyOrderSeeder::class,
         ]);
         
         // Buat Akun Admin

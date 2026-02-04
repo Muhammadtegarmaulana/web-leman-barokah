@@ -83,6 +83,7 @@ class OrderController extends Controller
     // 6. PROSES ORDER: Simpan ke Database
     public function storeOrder(Request $request)
     {
+        // 1. Validasi (Hapus dd($request->all()) jika masih ada!)
         $request->validate([
             'order_type' => 'required',
             'payment_method' => 'required',
@@ -90,32 +91,38 @@ class OrderController extends Controller
             'table_number' => 'required_if:order_type,dine_in',
         ]);
 
-        DB::transaction(function () use ($request) {
+        return DB::transaction(function () use ($request) {
             $cart = session()->get('cart');
             $total = 0;
             foreach($cart as $details) {
                 $total += $details['price'] * $details['quantity'];
             }
 
-            // Upload Bukti TF
-            $proofPath = null;
+            // 2. Inisialisasi Model secara Manual (Tanpa Order::create)
+            $order = new Order();
+            $order->user_id = Auth::id();
+            $order->order_type = $request->order_type;
+            $order->table_number = $request->table_number;
+            $order->payment_method = $request->payment_method;
+            $order->payment_status = 'unpaid';
+            $order->order_status = 'pending';
+            $order->total_price = $total;
+
+            // 3. PROSES UPLOAD (Kita simpan path-nya langsung ke object $order)
             if ($request->hasFile('payment_proof')) {
-                $proofPath = $request->file('payment_proof')->store('payment-proofs', 'public');
+                // Gunakan storeAs agar kita tahu nama filenya
+                $file = $request->file('payment_proof');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('payment-proofs', $fileName, 'public');
+                
+                // ISI LANGSUNG KE PROPERTI
+                $order->payment_proof = $path;
             }
 
-            // Buat Order
-            $order = Order::create([
-                'user_id' => Auth::id(),
-                'order_type' => $request->order_type,
-                'table_number' => $request->table_number,
-                'payment_method' => $request->payment_method,
-                'payment_proof' => $proofPath,
-                'payment_status' => 'unpaid',
-                'order_status' => 'pending',
-                'total_price' => $total,
-            ]);
+            // 4. PAKSA SIMPAN
+            $order->save();
 
-            // Buat Detail Item
+            // 5. Buat Detail Item
             foreach($cart as $id => $details) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -125,11 +132,10 @@ class OrderController extends Controller
                 ]);
             }
 
-            // Kosongkan Keranjang
             session()->forget('cart');
-        });
 
-        return redirect()->route('customer.orders.index')->with('success', 'Pesanan berhasil dibuat! Mohon tunggu konfirmasi Admin.');
+            return redirect()->route('customer.orders.index')->with('success', 'Pesanan berhasil dibuat!');
+        });
     }
 
     // 7. RIWAYAT: List Pesanan
@@ -178,5 +184,17 @@ class OrderController extends Controller
                 }
             }
         }
+    }
+
+    public function activeOrders()
+    {
+        // Mengambil pesanan milik user yang login yang statusnya belum 'completed'
+        $orders = Order::where('user_id', Auth::id())
+            ->where('order_status', '!=', 'completed')
+            ->with('items.menu') // Eager loading untuk mengambil detail menu
+            ->latest()
+            ->get();
+
+        return view('customer.orders.active', compact('orders'));
     }
 }
