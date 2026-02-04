@@ -9,14 +9,25 @@ use Carbon\Carbon;
 class AdminOrderController extends Controller
 {
     // 1. LIHAT DAFTAR PESANAN
-    public function index()
+    public function index(Request $request)
     {
-        // Ambil pesanan yang BELUM SELESAI (unpaid, pending, processing, ready)
-        // Urutkan dari yang terbaru
-        $orders = Order::where('order_status', '!=', 'completed')
-                        ->orderBy('created_at', 'desc')
-                        ->get();
-        
+        $query = Order::with('user')->where('order_status', '!=', 'completed');
+
+        // Search by Name or ID
+        if ($request->search) {
+            $query->where(function($q) use ($request) {
+                $q->whereHas('user', function($userQuery) use ($request) {
+                    $userQuery->where('name', 'like', '%' . $request->search . '%');
+                })->orWhere('id', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Filter by Status
+        if ($request->status && $request->status != 'semua') {
+            $query->where('order_status', $request->status);
+        }
+
+        $orders = $query->latest()->paginate(10)->withQueryString();
         return view('admin.orders.index', compact('orders'));
     }
 

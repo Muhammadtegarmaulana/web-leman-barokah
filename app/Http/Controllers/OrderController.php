@@ -12,9 +12,21 @@ use Illuminate\Support\Facades\DB;
 class OrderController extends Controller
 {
     // 1. DASHBOARD: Katalog Menu
-    public function index()
+    public function index(Request $request)
     {
-        $menus = Menu::where('is_available', true)->get();
+        $query = Menu::where('is_available', true);
+
+        // Filter Pencarian Nama
+        if ($request->has('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter Kategori
+        if ($request->has('category') && $request->category != 'semua') {
+            $query->where('category', $request->category);
+        }
+
+        $menus = $query->get();
         return view('customer.dashboard', compact('menus'));
     }
 
@@ -121,10 +133,21 @@ class OrderController extends Controller
     }
 
     // 7. RIWAYAT: List Pesanan
-    public function history()
+    public function history(Request $request)
     {
-        $orders = Order::where('user_id', Auth::id())->latest()->get();
-        return view('customer.orders.index', compact('orders'));
+        $sort = $request->input('sort', 'terbaru'); // Default terbaru
+        $query = Order::where('user_id', Auth::id());
+
+        if ($sort == 'terlama') {
+            $query->oldest();
+        } else {
+            $query->latest();
+        }
+
+        // Pagination maksimal 10 data
+        $orders = $query->paginate(10)->withQueryString();
+        
+        return view('customer.orders.index', compact('orders', 'sort'));
     }
 
     // TAMBAHAN: UPDATE QUANTITY (AJAX)
