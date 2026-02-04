@@ -85,9 +85,9 @@
                                 @endif
                             </div>
 
-                            <form action="{{ route('admin.orders.confirm', $order->id) }}" method="POST">
+                            <form action="{{ route('admin.orders.confirm', $order->id) }}" method="POST" id="form-confirm-pay">
                                 @csrf
-                                <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-xl shadow hover:bg-green-700 transition">
+                                <button type="button" class="btn-confirm-pay w-full bg-green-600 text-white font-bold py-3 rounded-xl shadow hover:bg-green-700 transition">
                                     ✅ Konfirmasi & Terbitkan Antrian
                                 </button>
                             </form>
@@ -121,9 +121,9 @@
 
                         @if($order->order_status == 'ready')
                             <div class="mt-6 border-t pt-4">
-                                <form action="{{ route('admin.orders.complete', $order->id) }}" method="POST" onsubmit="return confirm('Pesanan selesai dan akan diarsipkan?')">
+                                <form action="{{ route('admin.orders.complete', $order->id) }}" method="POST" id="form-complete-order">
                                     @csrf
-                                    <button type="submit" class="w-full bg-gray-800 text-white font-bold py-3 rounded-xl hover:bg-black transition">
+                                    <button type="button" class="btn-complete-order w-full bg-gray-800 text-white font-bold py-3 rounded-xl hover:bg-black transition">
                                         🏁 Selesai (Customer Sudah Ambil)
                                     </button>
                                 </form>
@@ -136,4 +136,55 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            // 1. Konfirmasi Pembayaran
+            const btnPay = document.querySelector('.btn-confirm-pay');
+            if(btnPay) {
+                btnPay.addEventListener('click', function() {
+                    Swal.fire({
+                        title: 'Konfirmasi Pembayaran?',
+                        text: "Sistem akan menerbitkan Nomor Antrian.",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#10B981', // Hijau
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Ya, Terbitkan!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire({ title: 'Memproses...', didOpen: () => Swal.showLoading() });
+                            document.getElementById('form-confirm-pay').submit();
+                        }
+                    });
+                });
+            }
+
+            // 2. Konfirmasi Selesai Order
+            const btnComplete = document.querySelector('.btn-complete-order');
+            if(btnComplete) {
+                btnComplete.addEventListener('click', function() {
+                    Swal.fire({
+                        title: 'Pesanan Selesai?',
+                        text: "Pastikan customer sudah mengambil pesanan. Data akan diarsipkan.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#1F2937', // Hitam/Abu gelap
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Ya, Selesai!',
+                        cancelButtonText: 'Belum'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire({ title: 'Menyimpan...', didOpen: () => Swal.showLoading() });
+                            document.getElementById('form-complete-order').submit();
+                        }
+                    });
+                });
+            }
+
+        });
+    </script>
+
 </x-app-layout>

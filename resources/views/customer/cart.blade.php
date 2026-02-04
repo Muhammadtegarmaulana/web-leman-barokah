@@ -115,7 +115,32 @@
             var ele = $(this);
             var id = ele.attr("data-id");
             var action = ele.attr("data-action");
+            var currentQty = parseInt(ele.siblings('span').text());
 
+            // Jika item tinggal 1 dan user klik minus, tanya dulu pakai SweetAlert
+            if(action === 'minus' && currentQty === 1) {
+                Swal.fire({
+                    title: 'Hapus item ini?',
+                    text: "Jumlah akan menjadi 0 dan item dihapus dari keranjang.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        performAjaxUpdate(id, action);
+                    }
+                });
+            } else {
+                // Jika quantity aman, langsung update
+                performAjaxUpdate(id, action);
+            }
+        });
+
+        // Fungsi AJAX Update terpisah agar rapi
+        function performAjaxUpdate(id, action) {
             $.ajax({
                 url: '{{ route('update_cart') }}',
                 method: "PATCH",
@@ -125,30 +150,51 @@
                     action: action
                 },
                 success: function (response) {
-                    // Reload halaman agar total harga terupdate dari server
                     window.location.reload();
                 }
             });
-        });
+        }
 
         // 2. HAPUS ITEM (Tombol Sampah)
         $(".remove-from-cart").click(function (e) {
             e.preventDefault();
             var ele = $(this);
+            var id = ele.attr("data-id");
             
-            if(confirm("Yakin ingin menghapus menu ini dari keranjang?")) {
-                $.ajax({
-                    url: '{{ route('remove_from_cart') }}',
-                    method: "DELETE",
-                    data: {
-                        _token: '{{ csrf_token() }}', 
-                        id: ele.attr("data-id")
-                    },
-                    success: function (response) {
-                        window.location.reload();
-                    }
-                });
-            }
+            // Ganti confirm() bawaan dengan SweetAlert
+            Swal.fire({
+                title: 'Yakin ingin menghapus?',
+                text: "Menu ini akan hilang dari keranjangmu.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444', // Merah
+                cancelButtonColor: '#6B7280', // Abu-abu
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Tampilkan Loading saat proses
+                    Swal.fire({
+                        title: 'Menghapus...',
+                        timer: 1000,
+                        didOpen: () => {
+                            Swal.showLoading()
+                        }
+                    });
+
+                    $.ajax({
+                        url: '{{ route('remove_from_cart') }}',
+                        method: "DELETE",
+                        data: {
+                            _token: '{{ csrf_token() }}', 
+                            id: id
+                        },
+                        success: function (response) {
+                            window.location.reload();
+                        }
+                    });
+                }
+            });
         });
     </script>
 </x-app-layout>

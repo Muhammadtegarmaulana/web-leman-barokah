@@ -96,7 +96,21 @@
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <x-dropdown-link :href="route('logout')" class="text-red-600 hover:bg-red-50 flex items-center gap-2"
-                                    onclick="event.preventDefault(); this.closest('form').submit();">
+                                    onclick="event.preventDefault(); 
+                                        Swal.fire({
+                                            title: 'Ingin keluar?',
+                                            text: 'Sesi anda akan diakhiri.',
+                                            icon: 'question',
+                                            showCancelButton: true,
+                                            confirmButtonColor: '#3085d6',
+                                            cancelButtonColor: '#d33',
+                                            confirmButtonText: 'Ya, Logout',
+                                            cancelButtonText: 'Batal'
+                                        }).then((result) => {
+                                            if (result.isConfirmed) {
+                                                this.closest('form').submit();
+                                            }
+                                        });">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                                 {{ __('Keluar Aplikasi') }}
                             </x-dropdown-link>
@@ -170,7 +184,21 @@
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <x-responsive-nav-link :href="route('logout')" class="text-red-600 hover:bg-red-50 rounded-lg"
-                            onclick="event.preventDefault(); this.closest('form').submit();">
+                            onclick="event.preventDefault(); 
+                                Swal.fire({
+                                    title: 'Ingin keluar?',
+                                    text: 'Sesi anda akan diakhiri.',
+                                    icon: 'question',
+                                    showCancelButton: true,
+                                    confirmButtonColor: '#3085d6',
+                                    cancelButtonColor: '#d33',
+                                    confirmButtonText: 'Ya, Logout',
+                                    cancelButtonText: 'Batal'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        this.closest('form').submit();
+                                    }
+                                });">
                         {{ __('Keluar Aplikasi') }}
                     </x-responsive-nav-link>
                 </form>
