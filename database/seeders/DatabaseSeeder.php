@@ -10,20 +10,26 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Buat Akun Admin
-        User::create([
-            'name' => 'Administrator',
-            'email' => 'admin@admin.com',
-            'password' => Hash::make('password'), // passwordnya: password
-            'role' => 'admin',
+        $this->call([
+            UserSeeder::class,
+            MenuSeeder::class,
+            DummyOrderSeeder::class,
         ]);
+        
+        // Buat Akun Admin
+        // User::create([
+        //     'name' => 'Administrator',
+        //     'email' => 'admin@admin.com',
+        //     'password' => Hash::make('password'), // passwordnya: password
+        //     'role' => 'admin',
+        // ]);
 
         // Buat Akun Dummy Customer (Untuk Test)
-        User::create([
-            'name' => 'Customer Test',
-            'email' => 'customer@gmail.com',
-            'password' => Hash::make('password'),
-            'role' => 'customer',
-        ]);
+        // User::create([
+        //     'name' => 'Customer Test',
+        //     'email' => 'customer@gmail.com',
+        //     'password' => Hash::make('password'),
+        //     'role' => 'customer',
+        // ]);
     }
 }
