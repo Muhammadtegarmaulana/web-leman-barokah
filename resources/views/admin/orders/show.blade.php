@@ -66,36 +66,47 @@
                 <div class="md:col-span-1 space-y-6">
                     
                     <div class="bg-white shadow-xl sm:rounded-2xl p-6 border border-gray-100">
-                        <h3 class="font-bold text-gray-700 mb-4">Status Pembayaran</h3>
+                        <h3 class="font-bold text-gray-700 mb-4">Informasi Pembayaran</h3>
                         
-                        @if($order->payment_status == 'unpaid')
-                            <div class="mb-4">
-                                <div class="text-xs font-bold uppercase text-gray-500 mb-1">Metode Bayar</div>
-                                <div class="font-bold text-lg mb-2">{{ ucfirst($order->payment_method) }}</div>
-                                
-                                @if($order->payment_method == 'transfer' && $order->payment_proof)
+                        @if($order->payment_method == 'transfer')
+                            <div class="mb-6">
+                                <div class="text-xs font-bold uppercase text-gray-500 mb-2">Metode: Transfer Bank</div>
+                                @if($order->payment_proof)
                                     <div class="mb-4">
-                                        <p class="text-xs mb-2">Bukti Transfer:</p>
-                                        <a href="{{ asset('storage/' . $order->payment_proof) }}" target="_blank">
-                                            <img src="{{ asset('storage/' . $order->payment_proof) }}" class="w-full rounded-lg border hover:opacity-75 cursor-zoom-in">
+                                        <p class="text-xs font-bold text-gray-400 mb-2 uppercase">Bukti Transfer:</p>
+                                        <a href="{{ asset('storage/' . $order->payment_proof) }}" target="_blank" class="block group">
+                                            <img src="{{ asset('storage/' . $order->payment_proof) }}" 
+                                                class="w-full rounded-xl border-4 border-gray-50 shadow-sm group-hover:opacity-80 transition cursor-zoom-in">
+                                            <p class="text-[10px] text-indigo-600 mt-2 italic font-bold">🔍 Klik untuk memperbesar</p>
                                         </a>
                                     </div>
-                                @elseif($order->payment_method == 'transfer')
-                                    <div class="text-red-500 text-sm italic mb-4">Bukti belum diupload customer.</div>
+                                @else
+                                    <div class="p-3 bg-red-50 text-red-500 text-xs font-bold rounded-lg border border-red-100">
+                                        ⚠️ Bukti transfer belum diupload.
+                                    </div>
                                 @endif
                             </div>
+                        @else
+                            <div class="mb-6">
+                                <div class="text-xs font-bold uppercase text-gray-500 mb-1">Metode: Cash</div>
+                                <div class="text-sm font-bold text-green-600">Bayar di Kasir</div>
+                            </div>
+                        @endif
 
+                        <hr class="my-4 border-gray-100">
+
+                        @if($order->payment_status == 'unpaid')
                             <form action="{{ route('admin.orders.confirm', $order->id) }}" method="POST" id="form-confirm-pay">
                                 @csrf
                                 <button type="button" class="btn-confirm-pay w-full bg-green-600 text-white font-bold py-3 rounded-xl shadow hover:bg-green-700 transition">
-                                    ✅ Konfirmasi & Terbitkan Antrian
+                                    ✅ Konfirmasi Pembayaran
                                 </button>
                             </form>
                         @else
                             <div class="bg-green-100 text-green-800 p-4 rounded-xl text-center">
-                                <div class="font-bold text-lg">LUNAS</div>
-                                <div class="text-sm">No. Antrian:</div>
-                                <div class="text-4xl font-extrabold my-2">{{ $order->queue_number }}</div>
+                                <div class="font-black text-lg tracking-widest">SUDAH LUNAS</div>
+                                <div class="text-[10px] uppercase font-bold opacity-70 mt-1">No. Antrian:</div>
+                                <div class="text-4xl font-black my-1">{{ $order->queue_number }}</div>
                             </div>
                         @endif
                     </div>

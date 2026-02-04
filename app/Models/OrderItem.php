@@ -9,14 +9,9 @@ class OrderItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'order_id',
-        'menu_id',
-        'quantity',
-        'price',
-    ];
+    protected $fillable = ['order_id', 'menu_id', 'quantity', 'price'];
 
-    // Relasi: Item milik 1 Menu
+    // Relasi ke Menu
     public function menu()
     {
         return $this->belongsTo(Menu::class);
