@@ -90,7 +90,7 @@ Akses melalui browser di: **http://127.0.0.1:8000**
 | Role     | Email                | Password   |
 |----------|----------------------|------------|
 | Admin    | admin@gmail.com      | password   |
-| Customer | customer@gmail.com   | password   |
+| Customer | tegar@gmail.com   | password   |
 
 ---
 
